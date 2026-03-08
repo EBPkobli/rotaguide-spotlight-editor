@@ -301,27 +301,27 @@ export function EditorPage() {
               <Icon name="expand_more" className="text-xs text-slate-500" />
             </button>
             {exportMenuOpen && (
-              <div className="absolute right-0 top-full mt-1.5 z-50 w-48 bg-[#1e1e1e] border border-[#464646] rounded-lg shadow-2xl py-1.5">
+              <div className="absolute right-0 top-full mt-1 z-50 w-52 bg-[#1e1e1e] border border-[#464646] rounded-md shadow-2xl overflow-hidden">
                 <button
                   onClick={() => handleExport(projectFormat)}
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#ec5b13]/15 transition-colors text-left"
+                  className="w-full flex items-center gap-2 px-3 py-[7px] text-[11px] font-medium text-white hover:bg-[#ec5b13]/15 transition-colors text-left"
                 >
-                  <Icon name="download" className="text-base text-[#ec5b13]" />
-                  {projectFormat.toUpperCase()}
-                  <span className="ml-auto text-[10px] text-[#ec5b13] font-mono bg-[#ec5b13]/10 px-1.5 py-0.5 rounded">default</span>
+                  <Icon name="download" className="text-sm text-[#ec5b13]" />
+                  <span className="flex-1 truncate">Export {projectFormat.toUpperCase()}</span>
+                  <span className="text-[9px] text-[#ec5b13]/80 font-mono">default</span>
                 </button>
-                <div className="h-px bg-[#464646] mx-3 my-1" />
+                <div className="h-px bg-[#333]" />
                 {CODE_FORMATS.filter((f) => f !== projectFormat).map((f) => (
                   <button
                     key={f}
                     onClick={() => handleExport(f)}
-                    className="w-full flex items-center gap-2.5 px-3.5 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-[#2d2d2d] transition-colors text-left"
+                    className="w-full flex items-center gap-2 px-3 py-[6px] text-[11px] text-slate-400 hover:text-white hover:bg-white/5 transition-colors text-left"
                   >
                     <Icon
                       name={f === "json" ? "data_object" : f === "yaml" ? "code" : "description"}
-                      className="text-base text-slate-500"
+                      className="text-sm text-slate-600"
                     />
-                    {f.toUpperCase()}
+                    Export {f.toUpperCase()}
                   </button>
                 ))}
               </div>
