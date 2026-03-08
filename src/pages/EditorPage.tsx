@@ -301,27 +301,27 @@ export function EditorPage() {
               <Icon name="expand_more" className="text-xs text-slate-500" />
             </button>
             {exportMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-[#252526] border border-[#3c3c3c] rounded-lg shadow-2xl py-1 animate-in fade-in">
+              <div className="absolute right-0 top-full mt-1.5 z-50 w-48 bg-[#1e1e1e] border border-[#464646] rounded-lg shadow-2xl py-1.5">
                 <button
                   onClick={() => handleExport(projectFormat)}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-white hover:bg-[#ec5b13]/20 transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#ec5b13]/15 transition-colors text-left"
                 >
-                  <Icon name="download" className="text-sm text-[#ec5b13]" />
-                  Export as {projectFormat.toUpperCase()}
-                  <span className="ml-auto text-[9px] text-[#ec5b13] font-mono bg-[#ec5b13]/10 px-1.5 py-0.5 rounded">default</span>
+                  <Icon name="download" className="text-base text-[#ec5b13]" />
+                  {projectFormat.toUpperCase()}
+                  <span className="ml-auto text-[10px] text-[#ec5b13] font-mono bg-[#ec5b13]/10 px-1.5 py-0.5 rounded">default</span>
                 </button>
-                <div className="h-px bg-[#3c3c3c] mx-2 my-1" />
+                <div className="h-px bg-[#464646] mx-3 my-1" />
                 {CODE_FORMATS.filter((f) => f !== projectFormat).map((f) => (
                   <button
                     key={f}
                     onClick={() => handleExport(f)}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-[#3c3c3c] transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-3.5 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-[#2d2d2d] transition-colors text-left"
                   >
                     <Icon
                       name={f === "json" ? "data_object" : f === "yaml" ? "code" : "description"}
-                      className="text-sm text-slate-500"
+                      className="text-base text-slate-500"
                     />
-                    Export as {f.toUpperCase()}
+                    {f.toUpperCase()}
                   </button>
                 ))}
               </div>
