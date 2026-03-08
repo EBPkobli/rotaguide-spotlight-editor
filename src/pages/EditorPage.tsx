@@ -398,6 +398,41 @@ export function EditorPage() {
                         <span>Missing required fields</span>
                       </div>
                     )}
+
+                    {/* ── Step actions ── */}
+                    <div className="mt-2 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        title="Move up"
+                        onClick={(e) => { e.stopPropagation(); moveStep(step.id, -1); }}
+                        disabled={index === 0}
+                        className="size-6 flex items-center justify-center rounded-md text-slate-500 hover:text-white hover:bg-[#3c3c3c] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-colors"
+                      >
+                        <Icon name="arrow_upward" className="text-sm" />
+                      </button>
+                      <button
+                        title="Move down"
+                        onClick={(e) => { e.stopPropagation(); moveStep(step.id, 1); }}
+                        disabled={index === filteredSteps.length - 1}
+                        className="size-6 flex items-center justify-center rounded-md text-slate-500 hover:text-white hover:bg-[#3c3c3c] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-colors"
+                      >
+                        <Icon name="arrow_downward" className="text-sm" />
+                      </button>
+                      <div className="w-px h-4 bg-[#3c3c3c] mx-0.5" />
+                      <button
+                        title="Duplicate step"
+                        onClick={(e) => { e.stopPropagation(); duplicateStep(step.id); }}
+                        className="size-6 flex items-center justify-center rounded-md text-slate-500 hover:text-white hover:bg-[#3c3c3c] transition-colors"
+                      >
+                        <Icon name="content_copy" className="text-sm" />
+                      </button>
+                      <button
+                        title="Delete step"
+                        onClick={(e) => { e.stopPropagation(); setConfirmAction({ type: "deleteStep", stepId: step.id }); }}
+                        className="size-6 flex items-center justify-center rounded-md text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      >
+                        <Icon name="delete" className="text-sm" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
