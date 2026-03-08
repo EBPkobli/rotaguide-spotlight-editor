@@ -14,6 +14,7 @@ import {
 } from "../lib/code/guideFormats";
 import { serializeGuideToMarkdown } from "../lib/md/serializeGuide";
 import { builderGuideSchema } from "../lib/schema/guideSchema";
+import { downloadTextFile } from "../services/export";
 import { useBuilderStore } from "../state/useBuilderStore";
 import type { BuilderStep } from "../types/builder";
 import {
@@ -74,6 +75,8 @@ export function EditorPage() {
   const [newTargetValue, setNewTargetValue] = useState("");
   const [pickingTarget, setPickingTarget] = useState(false);
   const [debugOpen, setDebugOpen] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
   const themeImportRef = useRef<HTMLInputElement | null>(null);
   const saveToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -105,6 +108,28 @@ export function EditorPage() {
     if (saveToastTimer.current) clearTimeout(saveToastTimer.current);
     saveToastTimer.current = setTimeout(() => setSaveToast(false), 2500);
   }, [saveProject]);
+
+  const handleExport = useCallback((format: CodeFormat) => {
+    const content = serializeGuideToFormat(guide, format);
+    const ext = format === "markdown" ? "guide.md" : format === "yaml" ? "yaml" : "json";
+    const filename = `${projectName || "guide"}.${ext}`;
+    const mime = format === "json" ? "application/json" : format === "yaml" ? "text/yaml" : "text/markdown";
+    downloadTextFile(filename, content, mime);
+    setExportMenuOpen(false);
+    setStatusMessage(`Exported as ${format.toUpperCase()}`);
+  }, [guide, projectName, setStatusMessage]);
+
+  // Close export menu on outside click
+  useEffect(() => {
+    if (!exportMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setExportMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [exportMenuOpen]);
 
   // cleanup timer on unmount
   useEffect(() => {
@@ -265,6 +290,43 @@ export function EditorPage() {
             <Icon name={saveToast ? "check_circle" : "save"} className="text-sm" />
             {saveToast ? "Saved!" : "Save"}
           </button>
+          <div className="relative" ref={exportMenuRef}>
+            <button
+              onClick={() => setExportMenuOpen((v) => !v)}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded transition-all bg-[#2d2d2d] border border-[#3c3c3c] text-slate-300 hover:bg-[#3c3c3c] hover:text-white"
+              title="Export project file"
+            >
+              <Icon name="download" className="text-sm" />
+              Export
+              <Icon name="expand_more" className="text-xs text-slate-500" />
+            </button>
+            {exportMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 z-50 w-44 bg-[#252526] border border-[#3c3c3c] rounded-lg shadow-2xl py-1 animate-in fade-in">
+                <button
+                  onClick={() => handleExport(projectFormat)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-white hover:bg-[#ec5b13]/20 transition-colors text-left"
+                >
+                  <Icon name="download" className="text-sm text-[#ec5b13]" />
+                  Export as {projectFormat.toUpperCase()}
+                  <span className="ml-auto text-[9px] text-[#ec5b13] font-mono bg-[#ec5b13]/10 px-1.5 py-0.5 rounded">default</span>
+                </button>
+                <div className="h-px bg-[#3c3c3c] mx-2 my-1" />
+                {CODE_FORMATS.filter((f) => f !== projectFormat).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => handleExport(f)}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-[#3c3c3c] transition-colors text-left"
+                  >
+                    <Icon
+                      name={f === "json" ? "data_object" : f === "yaml" ? "code" : "description"}
+                      className="text-sm text-slate-500"
+                    />
+                    Export as {f.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

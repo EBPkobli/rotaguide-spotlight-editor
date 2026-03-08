@@ -49,9 +49,14 @@ export function Header() {
         >
           <Icon name="code" className="text-sm" /> GitHub
         </a>
-        <button className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">
+        <a
+          href="https://buymeacoffee.com/furkankub"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-pink-400 hover:text-pink-300 hover:bg-pink-500/10 transition-colors no-underline"
+        >
           <Icon name="favorite" className="text-sm" /> Donate
-        </button>
+        </a>
       </div>
     </header>
   );

@@ -1,9 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { Icon } from "../components/ui/Icon";
+import { serializeGuideToFormat, type CodeFormat } from "../lib/code/guideFormats";
+import { downloadTextFile } from "../services/export";
 import { useBuilderStore } from "../state/useBuilderStore";
-import type { ProjectFormat } from "../types/builder";
+import type { BuilderProject, ProjectFormat } from "../types/builder";
 
 const FORMAT_OPTIONS: { value: ProjectFormat; label: string; icon: string; description: string }[] = [
   {
@@ -48,8 +50,31 @@ export function ProjectsPage() {
   const [newName, setNewName] = useState("");
   const [newFormat, setNewFormat] = useState<ProjectFormat>("json");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [exportMenuId, setExportMenuId] = useState<string | null>(null);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   const filteredProjects = projects;
+
+  const handleExportProject = (project: BuilderProject, format: CodeFormat) => {
+    const content = serializeGuideToFormat(project.guide, format);
+    const ext = format === "markdown" ? "guide.md" : format === "yaml" ? "yaml" : "json";
+    const filename = `${project.name || "guide"}.${ext}`;
+    const mime = format === "json" ? "application/json" : format === "yaml" ? "text/yaml" : "text/markdown";
+    downloadTextFile(filename, content, mime);
+    setExportMenuId(null);
+  };
+
+  // Close export menu on outside click
+  useEffect(() => {
+    if (!exportMenuId) return;
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setExportMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [exportMenuId]);
 
   const handleCreate = () => {
     const name = newName.trim() || "New Guide Project";
@@ -174,15 +199,65 @@ export function ProjectsPage() {
                       {project.format || "json"}
                     </span>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setConfirmDeleteId(project.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded-lg text-slate-500 hover:text-red-400 transition-all"
-                  >
-                    <Icon name="delete" className="text-lg" />
-                  </button>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExportMenuId(exportMenuId === project.id ? null : project.id);
+                        }}
+                        className="p-1 hover:bg-[#ec5b13]/20 rounded-lg text-slate-500 hover:text-[#ec5b13] transition-all"
+                        title="Export project"
+                      >
+                        <Icon name="download" className="text-lg" />
+                      </button>
+                      {exportMenuId === project.id && (
+                        <div
+                          ref={exportMenuRef}
+                          className="absolute right-0 top-full mt-1 z-50 w-44 bg-[#252526] border border-[#3c3c3c] rounded-lg shadow-2xl py-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleExportProject(project, project.format as CodeFormat);
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-white hover:bg-[#ec5b13]/20 transition-colors text-left"
+                          >
+                            <Icon name="download" className="text-sm text-[#ec5b13]" />
+                            Export as {(project.format || "json").toUpperCase()}
+                            <span className="ml-auto text-[9px] text-[#ec5b13] font-mono bg-[#ec5b13]/10 px-1.5 py-0.5 rounded">default</span>
+                          </button>
+                          <div className="h-px bg-[#3c3c3c] mx-2 my-1" />
+                          {(["json", "markdown", "yaml"] as CodeFormat[]).filter((f) => f !== project.format).map((f) => (
+                            <button
+                              key={f}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExportProject(project, f);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-[#3c3c3c] transition-colors text-left"
+                            >
+                              <Icon
+                                name={f === "json" ? "data_object" : f === "yaml" ? "code" : "description"}
+                                className="text-sm text-slate-500"
+                              />
+                              Export as {f.toUpperCase()}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmDeleteId(project.id);
+                      }}
+                      className="p-1 hover:bg-red-500/20 rounded-lg text-slate-500 hover:text-red-400 transition-all"
+                    >
+                      <Icon name="delete" className="text-lg" />
+                    </button>
+                  </div>
                 </div>
 
                 <h3 className="text-sm font-bold text-white mb-1 truncate">{project.name}</h3>
