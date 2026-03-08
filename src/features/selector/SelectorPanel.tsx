@@ -4,7 +4,7 @@ import { Card } from "../../components/ui/Card";
 function normalizeTarget(input: string): string {
   const value = input.trim();
   if (!value) return "";
-  if (/^[.#\[]/.test(value) || /[ >:+~]/.test(value)) {
+  if (/^[.#[]/.test(value) || /[ >:+~]/.test(value)) {
     return value;
   }
   return `[data-click-guide="${value.replace(/"/g, '\\"')}"]`;

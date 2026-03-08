@@ -6,7 +6,7 @@ import {
   guideTarget,
   parseGuideMarkdownSafe,
   type GuideIssue,
-} from "md-spotlight-guide-tool";
+} from "rotaguide-spotlight";
 import { Card } from "../../components/ui/Card";
 import { copyTextToClipboard, downloadTextFile } from "../../services/export";
 
@@ -17,7 +17,7 @@ interface PreviewPanelProps {
 
 function looksLikeSelector(target: string): boolean {
   if (!target) return false;
-  return /^[.#\[]/.test(target) || /[ >:+~]/.test(target);
+  return /^[.#[]/.test(target) || /[ >:+~]/.test(target);
 }
 
 export function PreviewPanel({ markdown, onImportMarkdown }: PreviewPanelProps) {

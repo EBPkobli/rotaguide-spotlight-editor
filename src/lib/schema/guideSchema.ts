@@ -1,11 +1,12 @@
 import { z } from "zod";
-import { ADVANCE_MODES, HIGHLIGHT_ANIMATIONS, HIGHLIGHT_STYLES, STEP_KINDS } from "../../types/builder";
+import { ADVANCE_MODES, HIGHLIGHT_ANIMATIONS, HIGHLIGHT_STYLES, STEP_KINDS, TOOLTIP_PLACEMENTS, TOOLTIP_TEMPLATES } from "../../types/builder";
 
 const metaSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1, "meta.title is required"),
   buttonLabel: z.string().optional(),
   tooltipTitle: z.string().optional(),
+  tooltipPlacement: z.enum(TOOLTIP_PLACEMENTS).optional(),
   overlayColor: z.string().optional(),
   highlightColor: z.string().optional(),
   tooltipWidth: z.number().int().positive().optional(),
@@ -13,6 +14,9 @@ const metaSchema = z.object({
   draggable: z.boolean().optional(),
   highlightStyle: z.enum(HIGHLIGHT_STYLES).optional(),
   highlightAnimation: z.enum(HIGHLIGHT_ANIMATIONS).optional(),
+  tooltipTemplate: z.enum(TOOLTIP_TEMPLATES).optional(),
+  i18n: z.record(z.string(), z.string()).optional(),
+  theme: z.record(z.string(), z.unknown()).optional(),
 });
 
 const stepSchema = z.object({
@@ -21,6 +25,7 @@ const stepSchema = z.object({
   title: z.string().min(1, "step.title is required"),
   kind: z.enum(STEP_KINDS),
   description: z.string().min(1, "step.description is required"),
+  tooltipPlacement: z.enum(TOOLTIP_PLACEMENTS).optional(),
   skippable: z.boolean().optional(),
   allowSkip: z.boolean().optional(),
   advanceOn: z.enum(ADVANCE_MODES).optional(),
@@ -34,6 +39,9 @@ const stepSchema = z.object({
   showAutoAdvanceProgress: z.boolean().optional(),
   mustClickTarget: z.boolean().optional(),
   mustEnterValue: z.boolean().optional(),
+  tooltipTemplate: z.enum(TOOLTIP_TEMPLATES).optional(),
+  i18n: z.record(z.string(), z.string()).optional(),
+  theme: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const builderGuideSchema = z.object({

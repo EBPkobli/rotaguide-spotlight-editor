@@ -1,11 +1,38 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createDefaultGuide, createDefaultStep } from "../lib/md/defaults";
-import type { BuilderGuide, BuilderMeta, BuilderStep } from "../types/builder";
+import type {
+  BuilderGuide,
+  BuilderMeta,
+  BuilderProject,
+  BuilderStep,
+  ProjectFormat,
+} from "../types/builder";
+
+const DEFAULT_PROJECT_NAME = "New Guide Project";
+
+function createProjectId(): string {
+  return `project-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function cloneGuide(guide: BuilderGuide): BuilderGuide {
+  return structuredClone(guide);
+}
 
 interface BuilderStoreState {
   guide: BuilderGuide;
   selectedStepId: string | null;
+  projectName: string;
+  projectFormat: ProjectFormat;
+  activeProjectId: string | null;
+  projects: BuilderProject[];
+  setProjectName: (value: string) => void;
+  setProjectFormat: (format: ProjectFormat) => void;
+  createNewProject: (name: string, format: ProjectFormat) => void;
+  saveProject: () => void;
+  loadProject: (projectId: string) => void;
+  deleteProject: (projectId: string) => void;
+  importProject: (payload: { name: string; guide: BuilderGuide; format?: ProjectFormat }) => void;
   setMeta: (patch: Partial<BuilderMeta>) => void;
   addStep: () => void;
   duplicateStep: (stepId: string) => void;
@@ -21,9 +48,105 @@ const defaultGuide = createDefaultGuide();
 
 export const useBuilderStore = create<BuilderStoreState>()(
   persist(
-    (set) => ({
-      guide: defaultGuide,
+    (set, get) => ({
+      guide: cloneGuide(defaultGuide),
       selectedStepId: defaultGuide.steps[0]?.id ?? null,
+      projectName: DEFAULT_PROJECT_NAME,
+      projectFormat: "json" as ProjectFormat,
+      activeProjectId: null,
+      projects: [],
+
+      setProjectName: (value) => set({ projectName: value }),
+      setProjectFormat: (format) => set({ projectFormat: format }),
+
+      createNewProject: (name, format) => {
+        const guide = createDefaultGuide();
+        const projectId = createProjectId();
+        const normalizedName = name.trim() || DEFAULT_PROJECT_NAME;
+        const snapshot: BuilderProject = {
+          id: projectId,
+          name: normalizedName,
+          format,
+          updatedAt: new Date().toISOString(),
+          guide: cloneGuide(guide),
+        };
+        set((state) => ({
+          projects: [snapshot, ...state.projects],
+          activeProjectId: projectId,
+          projectName: normalizedName,
+          projectFormat: format,
+          guide: cloneGuide(guide),
+          selectedStepId: guide.steps[0]?.id ?? null,
+        }));
+      },
+
+      saveProject: () => {
+        const state = get();
+        const normalizedName = state.projectName.trim() || DEFAULT_PROJECT_NAME;
+        const projectId = state.activeProjectId ?? createProjectId();
+        const snapshot: BuilderProject = {
+          id: projectId,
+          name: normalizedName,
+          format: state.projectFormat,
+          updatedAt: new Date().toISOString(),
+          guide: cloneGuide(state.guide),
+        };
+
+        set((current) => ({
+          projects: [snapshot, ...current.projects.filter((project) => project.id !== projectId)],
+          activeProjectId: projectId,
+          projectName: normalizedName,
+        }));
+      },
+
+      loadProject: (projectId) =>
+        set((state) => {
+          const selected = state.projects.find((project) => project.id === projectId);
+          if (!selected) return state;
+          return {
+            guide: cloneGuide(selected.guide),
+            selectedStepId: selected.guide.steps[0]?.id ?? null,
+            activeProjectId: selected.id,
+            projectName: selected.name,
+            projectFormat: selected.format ?? "json",
+          };
+        }),
+
+      deleteProject: (projectId) =>
+        set((state) => {
+          const projects = state.projects.filter((project) => project.id !== projectId);
+          if (state.activeProjectId !== projectId) {
+            return { projects };
+          }
+          return {
+            projects,
+            activeProjectId: null,
+            projectName: `${state.projectName} (Draft)`,
+          };
+        }),
+
+      importProject: (payload) => {
+        const normalizedName = payload.name.trim() || DEFAULT_PROJECT_NAME;
+        const projectId = createProjectId();
+        const importedGuide = cloneGuide(payload.guide);
+        const format = payload.format ?? "json";
+        const snapshot: BuilderProject = {
+          id: projectId,
+          name: normalizedName,
+          format,
+          updatedAt: new Date().toISOString(),
+          guide: importedGuide,
+        };
+
+        set((state) => ({
+          projects: [snapshot, ...state.projects.filter((project) => project.id !== projectId)],
+          activeProjectId: projectId,
+          projectName: normalizedName,
+          projectFormat: format,
+          guide: importedGuide,
+          selectedStepId: importedGuide.steps[0]?.id ?? null,
+        }));
+      },
 
       setMeta: (patch) =>
         set((state) => ({
@@ -58,14 +181,21 @@ export const useBuilderStore = create<BuilderStoreState>()(
         }),
 
       updateStep: (stepId, patch) =>
-        set((state) => ({
-          guide: {
-            ...state.guide,
-            steps: state.guide.steps.map((step) =>
-              step.id === stepId ? { ...step, ...patch } : step
-            ),
-          },
-        })),
+        set((state) => {
+          let selectedStepId = state.selectedStepId;
+          const steps = state.guide.steps.map((step) => {
+            if (step.id !== stepId) return step;
+            const next = { ...step, ...patch };
+            if (selectedStepId === stepId && patch.id && patch.id !== stepId) {
+              selectedStepId = patch.id;
+            }
+            return next;
+          });
+          return {
+            guide: { ...state.guide, steps },
+            selectedStepId,
+          };
+        }),
 
       removeStep: (stepId) =>
         set((state) => {
@@ -106,7 +236,7 @@ export const useBuilderStore = create<BuilderStoreState>()(
 
       importGuide: (guide) =>
         set({
-          guide,
+          guide: cloneGuide(guide),
           selectedStepId: guide.steps[0]?.id ?? null,
         }),
 
@@ -115,11 +245,14 @@ export const useBuilderStore = create<BuilderStoreState>()(
         set({
           guide,
           selectedStepId: guide.steps[0]?.id ?? null,
+          activeProjectId: null,
+          projectName: DEFAULT_PROJECT_NAME,
+          projectFormat: "json",
         });
       },
     }),
     {
-      name: "rotaguide-spotlight-editor-draft-v1",
+      name: "rotaguide-spotlight-editor-draft-v2",
     }
   )
 );

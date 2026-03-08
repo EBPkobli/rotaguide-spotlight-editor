@@ -2,7 +2,7 @@ import {
   parseGuideMarkdownSafe,
   type GuideDefinition,
   type GuideIssue,
-} from "md-spotlight-guide-tool";
+} from "rotaguide-spotlight";
 import type { BuilderGuide } from "../../types/builder";
 
 function fromGuideDefinition(guide: GuideDefinition): BuilderGuide {
@@ -12,6 +12,7 @@ function fromGuideDefinition(guide: GuideDefinition): BuilderGuide {
       title: guide.meta.title,
       buttonLabel: guide.meta.buttonLabel,
       tooltipTitle: guide.meta.tooltipTitle,
+      tooltipPlacement: guide.meta.tooltipPlacement,
       overlayColor: guide.meta.overlayColor,
       highlightColor: guide.meta.highlightColor,
       tooltipWidth: guide.meta.tooltipWidth,
@@ -19,6 +20,9 @@ function fromGuideDefinition(guide: GuideDefinition): BuilderGuide {
       draggable: guide.meta.draggable,
       highlightStyle: guide.meta.highlightStyle,
       highlightAnimation: guide.meta.highlightAnimation,
+      tooltipTemplate: guide.meta.tooltipTemplate,
+      i18n: guide.meta.i18n,
+      theme: guide.meta.theme,
     },
     steps: guide.steps.map((step) => ({
       id: step.id,
@@ -26,6 +30,7 @@ function fromGuideDefinition(guide: GuideDefinition): BuilderGuide {
       title: step.title,
       kind: step.kind,
       description: step.description,
+      tooltipPlacement: step.tooltipPlacement,
       skippable: step.skippable,
       allowSkip: step.allowSkip,
       advanceOn: step.advanceOn,
@@ -39,6 +44,9 @@ function fromGuideDefinition(guide: GuideDefinition): BuilderGuide {
       showAutoAdvanceProgress: step.showAutoAdvanceProgress,
       mustClickTarget: step.mustClickTarget,
       mustEnterValue: step.mustEnterValue,
+      tooltipTemplate: step.tooltipTemplate,
+      i18n: step.i18n,
+      theme: step.theme,
     })),
   };
 }

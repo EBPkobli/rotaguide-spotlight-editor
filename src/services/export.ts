@@ -7,8 +7,12 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
   }
 }
 
-export function downloadTextFile(filename: string, text: string): void {
-  const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+export function downloadTextFile(
+  filename: string,
+  text: string,
+  mimeType = "text/plain;charset=utf-8"
+): void {
+  const blob = new Blob([text], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
