@@ -142,17 +142,17 @@ const THUMBNAILS: Record<GuideTooltipTemplate, () => React.JSX.Element> = {
   ),
 
   "terminal-pop": () => (
-    <div className="w-full h-full rounded-md flex flex-col justify-between p-2"
-      style={{ background: "#0d0d0d", border: "1px solid #00ff41" }}>
+    <div className="w-full h-full flex flex-col justify-between p-2"
+      style={{ background: "#f5670e", borderRadius: 14, border: "1px solid rgba(255,255,255,0.15)" }}>
       <div className="space-y-1">
-        <div style={{ fontSize: 5, color: "#00ff41", fontFamily: "monospace" }}>{">"} Welcome</div>
-        <TextBar w="85%" color="#00ff41" h={1.5} />
-        <TextBar w="60%" color="rgba(0,255,65,0.4)" h={1.5} />
+        <TextBar w="55%" color="#ffffff" h={3} />
+        <TextBar w="80%" color="rgba(255,255,255,0.8)" />
+        <TextBar w="50%" color="rgba(255,255,255,0.6)" />
       </div>
       <div className="flex items-center justify-between">
-        <StepDots active={2} total={4} color="#00ff41" />
-        <div className="rounded px-1.5 py-0.5" style={{ border: "1px solid #00ff41", fontSize: 5, color: "#00ff41", fontFamily: "monospace" }}>
-          next
+        <StepDots active={2} total={4} color="rgba(255,255,255,0.5)" />
+        <div className="px-1.5 py-0.5" style={{ background: "rgba(255,255,255,0.24)", borderRadius: 8, fontSize: 5, color: "#ffffff", fontWeight: 700 }}>
+          Next
         </div>
       </div>
     </div>

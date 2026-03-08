@@ -7,6 +7,102 @@ import { Icon } from "../ui/Icon";
 import type { BuilderGuide, BuilderStep } from "../../types/builder";
 import { serializeGuideToFormat } from "../../lib/code/guideFormats";
 import type { CodeFormat } from "../../lib/code/guideFormats";
+import type { GuideTooltipTemplate } from "../../types/builder";
+
+/* ── Template style defaults (mirrors rotaguide-spotlight CSS vars) ── */
+interface TemplateStyle {
+  bg: string; border: string; radius: number;
+  title: string; desc: string;
+  pillStepBg: string; pillStepText: string;
+  pillKindBg: string; pillKindText: string;
+  ghostBg: string; ghostText: string; ghostBorder: string;
+  primaryBtnBg: string; primaryBtnText: string;
+  trackBg: string; fillBg: string;
+}
+
+const TEMPLATE_DEFAULTS: Record<GuideTooltipTemplate, TemplateStyle> = {
+  default: {
+    bg: "#ffffff", border: "#e3eaed", radius: 12,
+    title: "#002b45", desc: "#4d5e6b",
+    pillStepBg: "#fff5cc", pillStepText: "#002b45",
+    pillKindBg: "#e5f4ff", pillKindText: "#1a63f5",
+    ghostBg: "#ffffff", ghostText: "#002b45", ghostBorder: "#b6c7d1",
+    primaryBtnBg: "#1a63f5", primaryBtnText: "#ffffff",
+    trackBg: "#e7eef2", fillBg: "#1a63f5",
+  },
+  glass: {
+    bg: "rgba(255,255,255,0.72)", border: "rgba(179,199,214,0.9)", radius: 12,
+    title: "#002b45", desc: "#4d5e6b",
+    pillStepBg: "rgba(255,255,255,0.7)", pillStepText: "#002b45",
+    pillKindBg: "rgba(229,244,255,0.78)", pillKindText: "#1a63f5",
+    ghostBg: "#ffffff", ghostText: "#002b45", ghostBorder: "#b6c7d1",
+    primaryBtnBg: "#1a63f5", primaryBtnText: "#ffffff",
+    trackBg: "#e7eef2", fillBg: "#1a63f5",
+  },
+  minimal: {
+    bg: "#ffffff", border: "#dce5eb", radius: 8,
+    title: "#002b45", desc: "#4d5e6b",
+    pillStepBg: "transparent", pillStepText: "#4d5e6b",
+    pillKindBg: "transparent", pillKindText: "#4d5e6b",
+    ghostBg: "#ffffff", ghostText: "#002b45", ghostBorder: "#b6c7d1",
+    primaryBtnBg: "#1a63f5", primaryBtnText: "#ffffff",
+    trackBg: "#e7eef2", fillBg: "#1a63f5",
+  },
+  contrast: {
+    bg: "#0f1724", border: "#2b3b4f", radius: 12,
+    title: "#f6fcff", desc: "#b5c9d9",
+    pillStepBg: "rgba(255,255,255,0.12)", pillStepText: "#f6fcff",
+    pillKindBg: "rgba(56,138,255,0.22)", pillKindText: "#a7d3ff",
+    ghostBg: "#162131", ghostText: "#eaf6ff", ghostBorder: "#3a5069",
+    primaryBtnBg: "#1d6af5", primaryBtnText: "#ffffff",
+    trackBg: "#293b51", fillBg: "#56a6ff",
+  },
+  "dashboard-orange": {
+    bg: "#0a1b3a", border: "#f56d16", radius: 14,
+    title: "#ff8534", desc: "#e0ecfa",
+    pillStepBg: "#f56d16", pillStepText: "#ffffff",
+    pillKindBg: "rgba(255,255,255,0.12)", pillKindText: "#ebf4ff",
+    ghostBg: "rgba(255,255,255,0.04)", ghostText: "#ecf6ff", ghostBorder: "#f56d16",
+    primaryBtnBg: "#f56d16", primaryBtnText: "#ffffff",
+    trackBg: "#1e345a", fillBg: "#f56d16",
+  },
+  "clean-white": {
+    bg: "#ffffff", border: "#f7670e", radius: 30,
+    title: "#14213e", desc: "#4e5f79",
+    pillStepBg: "#ffefe8", pillStepText: "#f5670e",
+    pillKindBg: "#eff4fc", pillKindText: "#687b97",
+    ghostBg: "#f0f4f9", ghostText: "#18243b", ghostBorder: "#f0f4f9",
+    primaryBtnBg: "#f5670e", primaryBtnText: "#ffffff",
+    trackBg: "#e7eef2", fillBg: "#f5670e",
+  },
+  "commerce-dark": {
+    bg: "#26140b", border: "rgba(245,109,22,0.5)", radius: 24,
+    title: "#f8fbff", desc: "#afbcd1",
+    pillStepBg: "rgba(245,109,22,0.16)", pillStepText: "#ff863e",
+    pillKindBg: "rgba(255,255,255,0.08)", pillKindText: "#eef4ff",
+    ghostBg: "transparent", ghostText: "#f6fbff", ghostBorder: "rgba(245,109,22,0.4)",
+    primaryBtnBg: "#f5670e", primaryBtnText: "#ffffff",
+    trackBg: "rgba(255,255,255,0.1)", fillBg: "#f5670e",
+  },
+  "terminal-pop": {
+    bg: "#f5670e", border: "rgba(255,255,255,0.15)", radius: 28,
+    title: "#ffffff", desc: "rgba(255,255,255,0.95)",
+    pillStepBg: "rgba(255,255,255,0.28)", pillStepText: "#ffffff",
+    pillKindBg: "rgba(0,0,0,0.14)", pillKindText: "#ffffff",
+    ghostBg: "#ffffff", ghostText: "#e05f0c", ghostBorder: "#ffffff",
+    primaryBtnBg: "rgba(255,255,255,0.24)", primaryBtnText: "#ffffff",
+    trackBg: "rgba(255,255,255,0.24)", fillBg: "#ffffff",
+  },
+  "outline-light": {
+    bg: "#f9fbff", border: "#f5670e", radius: 24,
+    title: "#121d39", desc: "#4f6078",
+    pillStepBg: "#ffede4", pillStepText: "#f5670e",
+    pillKindBg: "#eff4fc", pillKindText: "#687b97",
+    ghostBg: "transparent", ghostText: "#6e7e94", ghostBorder: "transparent",
+    primaryBtnBg: "#f5670e", primaryBtnText: "#ffffff",
+    trackBg: "#e7eef2", fillBg: "#f5670e",
+  },
+};
 
 interface LivePreviewProps {
   guide: BuilderGuide;
@@ -94,8 +190,6 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
     setHoveredPos(null);
   }, []);
 
-  const primaryBg =
-    (guide.meta.theme?.primaryButtonBackgroundColor as string) || "#ec5b13";
   const highlightColor =
     selectedStep?.highlightColor || guide.meta.highlightColor || "#ffc700";
   const highlightStyle =
@@ -104,6 +198,30 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
     selectedStep?.highlightAnimation || guide.meta.highlightAnimation || "none";
   const placement =
     selectedStep?.tooltipPlacement || guide.meta.tooltipPlacement || "bottom";
+
+  /* ── Template-based tooltip defaults (matches rotaguide-spotlight CSS) ── */
+  const activeTemplate =
+    selectedStep?.tooltipTemplate || guide.meta.tooltipTemplate || "default";
+  const tpl = TEMPLATE_DEFAULTS[activeTemplate] || TEMPLATE_DEFAULTS.default;
+  const theme = guide.meta.theme ?? {};
+  const tt = {
+    bg: (theme.tooltipBackgroundColor as string) || tpl.bg,
+    border: (theme.tooltipBorderColor as string) || tpl.border,
+    radius: (theme.tooltipBorderRadius as number) ?? tpl.radius,
+    title: (theme.titleColor as string) || tpl.title,
+    desc: (theme.descriptionColor as string) || tpl.desc,
+    pillStepBg: tpl.pillStepBg,
+    pillStepText: tpl.pillStepText,
+    pillKindBg: tpl.pillKindBg,
+    pillKindText: tpl.pillKindText,
+    ghostBg: (theme.ghostButtonBackgroundColor as string) || tpl.ghostBg,
+    ghostText: (theme.ghostButtonTextColor as string) || tpl.ghostText,
+    ghostBorder: (theme.ghostButtonBorderColor as string) || tpl.ghostBorder,
+    primaryBtnBg: (theme.primaryButtonBackgroundColor as string) || tpl.primaryBtnBg,
+    primaryBtnText: tpl.primaryBtnText,
+    trackBg: (theme.timerTrackColor as string) || tpl.trackBg,
+    fillBg: (theme.timerFillColor as string) || tpl.fillBg,
+  };
 
   return (
     <div className="flex flex-col flex-1 min-h-0 border-b border-[#3c3c3c]">
@@ -343,11 +461,11 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                   <div
                     className="relative shadow-2xl p-4"
                     style={{
-                      borderRadius: `${(guide.meta.theme?.tooltipBorderRadius as number) || 12}px`,
+                      borderRadius: `${tt.radius}px`,
                       borderWidth: 2,
                       borderStyle: "solid",
-                      borderColor: (guide.meta.theme?.tooltipBorderColor as string) || primaryBg,
-                      background: (guide.meta.theme?.tooltipBackgroundColor as string) || "#ffffff",
+                      borderColor: tt.border,
+                      background: tt.bg,
                     }}
                   >
                     {/* Arrow indicator */}
@@ -364,8 +482,8 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                                 : "left-1/2 -translate-x-1/2 -bottom-[7px] border-b-2 border-r-2"
                       }`}
                       style={{
-                        borderColor: (guide.meta.theme?.tooltipBorderColor as string) || primaryBg,
-                        background: (guide.meta.theme?.tooltipBackgroundColor as string) || "#ffffff",
+                        borderColor: tt.border,
+                        background: tt.bg,
                       }}
                     />
 
@@ -373,11 +491,14 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                     <div className="flex items-center gap-1.5 mb-2">
                       <span
                         className="text-[8px] px-1.5 py-0.5 rounded-full font-bold"
-                        style={{ background: `${primaryBg}15`, color: primaryBg }}
+                        style={{ background: tt.pillStepBg, color: tt.pillStepText }}
                       >
                         {stepIndex + 1}/{guide.steps.length || 1}
                       </span>
-                      <span className="text-[8px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full font-bold uppercase">
+                      <span
+                        className="text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase"
+                        style={{ background: tt.pillKindBg, color: tt.pillKindText }}
+                      >
                         {kind}
                       </span>
                     </div>
@@ -385,7 +506,7 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                     {/* Title */}
                     <h4
                       className="font-bold text-xs leading-tight mb-1"
-                      style={{ color: (guide.meta.theme?.titleColor as string) || "#1a1a1a" }}
+                      style={{ color: tt.title }}
                     >
                       {selectedStep?.title || "Step Title"}
                     </h4>
@@ -393,7 +514,7 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                     {/* Description */}
                     <p
                       className="text-[10px] leading-relaxed mb-3"
-                      style={{ color: (guide.meta.theme?.descriptionColor as string) || "#6b7280" }}
+                      style={{ color: tt.desc }}
                     >
                       {selectedStep?.description || "Step description will appear here..."}
                     </p>
@@ -402,13 +523,13 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                     <div className="mb-3">
                       <div
                         className="h-1 rounded-full overflow-hidden"
-                        style={{ background: (guide.meta.theme?.timerTrackColor as string) || "#e5e5e5" }}
+                        style={{ background: tt.trackBg }}
                       >
                         <div
                           className="h-full rounded-full transition-all"
                           style={{
                             width: `${((stepIndex + 1) / Math.max(guide.steps.length, 1)) * 100}%`,
-                            background: (guide.meta.theme?.timerFillColor as string) || primaryBg,
+                            background: tt.fillBg,
                           }}
                         />
                       </div>
@@ -419,16 +540,16 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                       <button
                         className="px-2.5 py-1 text-[9px] font-bold rounded-md border"
                         style={{
-                          borderColor: (guide.meta.theme?.ghostButtonBorderColor as string) || "#e5e5e5",
-                          color: (guide.meta.theme?.ghostButtonTextColor as string) || "#6b7280",
-                          background: (guide.meta.theme?.ghostButtonBackgroundColor as string) || "transparent",
+                          borderColor: tt.ghostBorder,
+                          color: tt.ghostText,
+                          background: tt.ghostBg,
                         }}
                       >
                         {guide.meta.i18n?.backButtonLabel || "Back"}
                       </button>
                       <button
-                        className="px-2.5 py-1 text-[9px] font-bold rounded-md text-white"
-                        style={{ background: primaryBg }}
+                        className="px-2.5 py-1 text-[9px] font-bold rounded-md"
+                        style={{ background: tt.primaryBtnBg, color: tt.primaryBtnText }}
                       >
                         {stepIndex + 1 >= guide.steps.length
                           ? guide.meta.i18n?.finishButtonLabel || "Finish"
