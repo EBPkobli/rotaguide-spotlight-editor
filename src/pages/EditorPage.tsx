@@ -22,10 +22,18 @@ import {
   ADVANCE_MODES,
   HIGHLIGHT_STYLES,
   HIGHLIGHT_ANIMATIONS,
+  PILL_TEXT_TRANSFORMS,
+  PRIMARY_ACTIONS,
   TOOLTIP_PLACEMENTS,
   TOOLTIP_TEMPLATES,
 } from "../types/builder";
-import type { GuideI18n, GuideTheme } from "../types/builder";
+import type {
+  GuideActions,
+  GuideI18n,
+  GuidePills,
+  GuidePrimaryAction,
+  GuideTheme,
+} from "../types/builder";
 import { z } from "zod";
 
 /* ───── types ───── */
@@ -184,6 +192,42 @@ export function EditorPage() {
   const handleThemeChange = (key: keyof GuideTheme, value: string | number) => {
     const current = guide.meta.theme ?? {};
     setMeta({ theme: { ...current, [key]: value } });
+  };
+
+  const handleMetaPillChange = (key: keyof GuidePills, value: boolean) => {
+    const current = guide.meta.pills ?? {};
+    setMeta({ pills: { ...current, [key]: value } });
+  };
+
+  const handleMetaActionChange = (
+    key: keyof GuideActions,
+    value: boolean | GuidePrimaryAction | undefined
+  ) => {
+    const current = guide.meta.actions ?? {};
+    setMeta({ actions: { ...current, [key]: value } });
+  };
+
+  const handleStepPillChange = (key: keyof GuidePills, value: boolean) => {
+    if (!selectedStep) return;
+    updateStep(selectedStep.id, {
+      pills: {
+        ...(selectedStep.pills ?? {}),
+        [key]: value,
+      },
+    });
+  };
+
+  const handleStepActionChange = (
+    key: keyof GuideActions,
+    value: boolean | GuidePrimaryAction | undefined
+  ) => {
+    if (!selectedStep) return;
+    updateStep(selectedStep.id, {
+      actions: {
+        ...(selectedStep.actions ?? {}),
+        [key]: value,
+      },
+    });
   };
 
   const handleExportTheme = () => {
@@ -583,6 +627,128 @@ export function EditorPage() {
                   </div>
 
                   {/* ─── Separator ─── */}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-[#2d2d2d] border border-[#3c3c3c] rounded-xl p-4 space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-[#ec5b13]">
+                        Header Pills
+                      </h4>
+                      {([
+                        {
+                          key: "showStepProgress" as const,
+                          label: "Show Step Progress",
+                          desc: "Display the progress pill in the tooltip header",
+                        },
+                        {
+                          key: "showKind" as const,
+                          label: "Show Kind Pill",
+                          desc: "Display the step kind pill in the tooltip header",
+                        },
+                      ] as const).map((toggle) => (
+                        <div
+                          key={toggle.key}
+                          onClick={() =>
+                            handleStepPillChange(
+                              toggle.key,
+                              selectedStep.pills?.[toggle.key] === false
+                            )
+                          }
+                          className="flex items-center gap-3 p-3 border border-[#3c3c3c] rounded-xl cursor-pointer hover:bg-[#3c3c3c]/30 transition-colors"
+                        >
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={selectedStep.pills?.[toggle.key] !== false}
+                            className={`w-10 h-6 rounded-full relative p-1 transition-colors shrink-0 cursor-pointer ${
+                              selectedStep.pills?.[toggle.key] !== false
+                                ? "bg-[#ec5b13]"
+                                : "bg-slate-700"
+                            }`}
+                          >
+                            <div
+                              className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                                selectedStep.pills?.[toggle.key] !== false
+                                  ? "translate-x-4"
+                                  : ""
+                              }`}
+                            />
+                          </button>
+                          <div>
+                            <p className="text-sm font-bold text-slate-200">{toggle.label}</p>
+                            <p className="text-[10px] text-slate-500">{toggle.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-[#2d2d2d] border border-[#3c3c3c] rounded-xl p-4 space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-[#ec5b13]">
+                        Footer Actions
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {([
+                          { key: "showClose" as const, label: "Close" },
+                          { key: "showBack" as const, label: "Back" },
+                          { key: "showNext" as const, label: "Next" },
+                          { key: "showSkip" as const, label: "Skip" },
+                        ] as const).map((toggle) => (
+                          <div
+                            key={toggle.key}
+                            onClick={() =>
+                              handleStepActionChange(
+                                toggle.key,
+                                selectedStep.actions?.[toggle.key] === false
+                              )
+                            }
+                            className="flex items-center gap-3 p-3 border border-[#3c3c3c] rounded-xl cursor-pointer hover:bg-[#3c3c3c]/30 transition-colors"
+                          >
+                            <button
+                              type="button"
+                              role="switch"
+                              aria-checked={selectedStep.actions?.[toggle.key] !== false}
+                              className={`w-10 h-6 rounded-full relative p-1 transition-colors shrink-0 cursor-pointer ${
+                                selectedStep.actions?.[toggle.key] !== false
+                                  ? "bg-[#ec5b13]"
+                                  : "bg-slate-700"
+                              }`}
+                            >
+                              <div
+                                className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                                  selectedStep.actions?.[toggle.key] !== false
+                                    ? "translate-x-4"
+                                    : ""
+                                }`}
+                              />
+                            </button>
+                            <span className="text-sm font-bold text-slate-200">
+                              {toggle.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 uppercase">
+                          Primary Action
+                        </label>
+                        <select
+                          value={selectedStep.actions?.primaryAction || "next"}
+                          onChange={(e) =>
+                            handleStepActionChange(
+                              "primaryAction",
+                              e.target.value as GuidePrimaryAction
+                            )
+                          }
+                          className="bg-[#252526] border border-[#3c3c3c] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#ec5b13]"
+                        >
+                          {PRIMARY_ACTIONS.map((action) => (
+                            <option key={action} value={action}>
+                              {action}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-[#3c3c3c]" />
                     <img src="/icon.svg" alt="" className="size-4 opacity-20" />
@@ -1402,6 +1568,189 @@ export function EditorPage() {
                                       </div>
                                     </div>
                                   ))}
+                                </div>
+                              </div>
+
+                              <div className="border-t border-[#3c3c3c] pt-6 space-y-6">
+                                <div>
+                                  <h4 className="text-xs font-bold text-[#ec5b13] uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <Icon name="format_size" className="text-sm" /> Pill Typography
+                                  </h4>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-semibold text-slate-500 uppercase">
+                                        Pill Font Size
+                                      </label>
+                                      <input
+                                        type="number"
+                                        value={(guide.meta.theme?.pillFontSize as number) || 11}
+                                        onChange={(e) =>
+                                          handleThemeChange("pillFontSize", Number(e.target.value) || 0)
+                                        }
+                                        className="w-full bg-[#252526] border border-[#3c3c3c] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#ec5b13]"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-semibold text-slate-500 uppercase">
+                                        Pill Font Weight
+                                      </label>
+                                      <input
+                                        type="number"
+                                        value={(guide.meta.theme?.pillFontWeight as number) || 600}
+                                        onChange={(e) =>
+                                          handleThemeChange("pillFontWeight", Number(e.target.value) || 0)
+                                        }
+                                        className="w-full bg-[#252526] border border-[#3c3c3c] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#ec5b13]"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-semibold text-slate-500 uppercase">
+                                        Pill Letter Spacing
+                                      </label>
+                                      <input
+                                        value={(guide.meta.theme?.pillLetterSpacing as string) || ""}
+                                        onChange={(e) => handleThemeChange("pillLetterSpacing", e.target.value)}
+                                        className="w-full bg-[#252526] border border-[#3c3c3c] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#ec5b13]"
+                                        placeholder="0.02em"
+                                      />
+                                    </div>
+                                    <div className="space-y-1">
+                                      <label className="text-[10px] font-semibold text-slate-500 uppercase">
+                                        Pill Text Transform
+                                      </label>
+                                      <select
+                                        value={(guide.meta.theme?.pillTextTransform as string) || "none"}
+                                        onChange={(e) =>
+                                          handleThemeChange("pillTextTransform", e.target.value)
+                                        }
+                                        className="w-full bg-[#252526] border border-[#3c3c3c] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#ec5b13]"
+                                      >
+                                        {PILL_TEXT_TRANSFORMS.map((value) => (
+                                          <option key={value} value={value}>
+                                            {value}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h4 className="text-xs font-bold text-[#ec5b13] uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <Icon name="view_day" className="text-sm" /> Global Pills & Actions
+                                  </h4>
+                                  <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-3">
+                                      <p className="text-[10px] font-bold text-slate-500 uppercase">
+                                        Header Pills
+                                      </p>
+                                      {([
+                                        { key: "showStepProgress" as const, label: "Show Step Progress" },
+                                        { key: "showKind" as const, label: "Show Kind Pill" },
+                                      ] as const).map((toggle) => (
+                                        <div
+                                          key={toggle.key}
+                                          onClick={() =>
+                                            handleMetaPillChange(
+                                              toggle.key,
+                                              guide.meta.pills?.[toggle.key] === false
+                                            )
+                                          }
+                                          className="flex items-center gap-3 p-3 border border-[#3c3c3c] rounded-xl cursor-pointer hover:bg-[#3c3c3c]/30 transition-colors"
+                                        >
+                                          <button
+                                            type="button"
+                                            role="switch"
+                                            aria-checked={guide.meta.pills?.[toggle.key] !== false}
+                                            className={`w-10 h-6 rounded-full relative p-1 transition-colors shrink-0 cursor-pointer ${
+                                              guide.meta.pills?.[toggle.key] !== false
+                                                ? "bg-[#ec5b13]"
+                                                : "bg-slate-700"
+                                            }`}
+                                          >
+                                            <div
+                                              className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                                                guide.meta.pills?.[toggle.key] !== false
+                                                  ? "translate-x-4"
+                                                  : ""
+                                              }`}
+                                            />
+                                          </button>
+                                          <span className="text-sm font-bold text-slate-200">
+                                            {toggle.label}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+
+                                    <div className="space-y-3">
+                                      <p className="text-[10px] font-bold text-slate-500 uppercase">
+                                        Footer Actions
+                                      </p>
+                                      <div className="grid grid-cols-2 gap-3">
+                                        {([
+                                          { key: "showClose" as const, label: "Close" },
+                                          { key: "showBack" as const, label: "Back" },
+                                          { key: "showNext" as const, label: "Next" },
+                                          { key: "showSkip" as const, label: "Skip" },
+                                        ] as const).map((toggle) => (
+                                          <div
+                                            key={toggle.key}
+                                            onClick={() =>
+                                              handleMetaActionChange(
+                                                toggle.key,
+                                                guide.meta.actions?.[toggle.key] === false
+                                              )
+                                            }
+                                            className="flex items-center gap-3 p-3 border border-[#3c3c3c] rounded-xl cursor-pointer hover:bg-[#3c3c3c]/30 transition-colors"
+                                          >
+                                            <button
+                                              type="button"
+                                              role="switch"
+                                              aria-checked={guide.meta.actions?.[toggle.key] !== false}
+                                              className={`w-10 h-6 rounded-full relative p-1 transition-colors shrink-0 cursor-pointer ${
+                                                guide.meta.actions?.[toggle.key] !== false
+                                                  ? "bg-[#ec5b13]"
+                                                  : "bg-slate-700"
+                                              }`}
+                                            >
+                                              <div
+                                                className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                                                  guide.meta.actions?.[toggle.key] !== false
+                                                    ? "translate-x-4"
+                                                    : ""
+                                                }`}
+                                              />
+                                            </button>
+                                            <span className="text-sm font-bold text-slate-200">
+                                              {toggle.label}
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <div className="space-y-1">
+                                        <label className="text-[10px] font-semibold text-slate-500 uppercase">
+                                          Primary Action
+                                        </label>
+                                        <select
+                                          value={guide.meta.actions?.primaryAction || "next"}
+                                          onChange={(e) =>
+                                            handleMetaActionChange(
+                                              "primaryAction",
+                                              e.target.value as GuidePrimaryAction
+                                            )
+                                          }
+                                          className="w-full bg-[#252526] border border-[#3c3c3c] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#ec5b13]"
+                                        >
+                                          {PRIMARY_ACTIONS.map((action) => (
+                                            <option key={action} value={action}>
+                                              {action}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
 

@@ -1,15 +1,28 @@
 import type {
   GuideAdvanceMode,
+  GuideActions,
   GuideHighlightAnimation,
   GuideHighlightStyle,
   GuideKind,
   GuideTooltipPlacement,
   GuideTooltipTemplate,
   GuideI18n,
+  GuidePills,
+  GuidePrimaryAction,
   GuideTheme,
+  GuideTextTransform,
 } from "rotaguide-spotlight";
 
-export type { GuideTooltipPlacement, GuideTooltipTemplate, GuideI18n, GuideTheme };
+export type {
+  GuideActions,
+  GuidePills,
+  GuidePrimaryAction,
+  GuideTooltipPlacement,
+  GuideTooltipTemplate,
+  GuideI18n,
+  GuideTheme,
+  GuideTextTransform,
+};
 
 export type ProjectFormat = "markdown" | "json" | "yaml";
 
@@ -28,6 +41,8 @@ export interface BuilderMeta {
   highlightAnimation?: GuideHighlightAnimation;
   tooltipTemplate?: GuideTooltipTemplate;
   i18n?: GuideI18n;
+  pills?: GuidePills;
+  actions?: GuideActions;
   theme?: GuideTheme;
 }
 
@@ -53,6 +68,8 @@ export interface BuilderStep {
   mustEnterValue?: boolean;
   tooltipTemplate?: GuideTooltipTemplate;
   i18n?: GuideI18n;
+  pills?: GuidePills;
+  actions?: GuideActions;
   theme?: GuideTheme;
 }
 
@@ -108,4 +125,13 @@ export const TOOLTIP_TEMPLATES: GuideTooltipTemplate[] = [
   "commerce-dark",
   "terminal-pop",
   "outline-light",
+];
+
+export const PRIMARY_ACTIONS: GuidePrimaryAction[] = ["back", "next", "skip"];
+
+export const PILL_TEXT_TRANSFORMS: GuideTextTransform[] = [
+  "none",
+  "uppercase",
+  "lowercase",
+  "capitalize",
 ];

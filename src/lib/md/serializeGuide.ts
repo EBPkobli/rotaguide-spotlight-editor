@@ -16,6 +16,21 @@ function pushField(lines: string[], key: string, value: unknown): void {
   lines.push(`${key}: ${toYamlValue(value)}`);
 }
 
+function pushObjectBlock(lines: string[], key: string, value: unknown): void {
+  if (!value || typeof value !== "object") return;
+  const entries = Object.entries(value).filter(([, entry]) => {
+    if (entry === undefined || entry === null) return false;
+    if (typeof entry === "string") return entry.trim() !== "";
+    return typeof entry === "number" || typeof entry === "boolean";
+  });
+  if (entries.length === 0) return;
+
+  lines.push(`${key}:`);
+  for (const [entryKey, entryValue] of entries) {
+    lines.push(`  ${entryKey}: ${toYamlValue(entryValue as string | number | boolean)}`);
+  }
+}
+
 function serializeMeta(meta: BuilderMeta): string[] {
   const lines: string[] = ["---"];
   pushField(lines, "id", meta.id);
@@ -31,32 +46,10 @@ function serializeMeta(meta: BuilderMeta): string[] {
   pushField(lines, "tooltipWidth", meta.tooltipWidth);
   pushField(lines, "showHighlight", meta.showHighlight);
   pushField(lines, "draggable", meta.draggable);
-
-  // Serialize i18n block
-  if (meta.i18n && typeof meta.i18n === "object") {
-    const i18nEntries = Object.entries(meta.i18n).filter(
-      ([, v]) => v !== undefined && v !== null && String(v).trim() !== ""
-    );
-    if (i18nEntries.length > 0) {
-      lines.push("i18n:");
-      for (const [k, v] of i18nEntries) {
-        lines.push(`  ${k}: ${toYamlValue(v as string)}`);
-      }
-    }
-  }
-
-  // Serialize theme block
-  if (meta.theme && typeof meta.theme === "object") {
-    const themeEntries = Object.entries(meta.theme).filter(
-      ([, v]) => v !== undefined && v !== null && String(v).trim() !== ""
-    );
-    if (themeEntries.length > 0) {
-      lines.push("theme:");
-      for (const [k, v] of themeEntries) {
-        lines.push(`  ${k}: ${toYamlValue(v as string | number | boolean)}`);
-      }
-    }
-  }
+  pushObjectBlock(lines, "pills", meta.pills);
+  pushObjectBlock(lines, "actions", meta.actions);
+  pushObjectBlock(lines, "i18n", meta.i18n);
+  pushObjectBlock(lines, "theme", meta.theme);
 
   lines.push("---");
   return lines;
@@ -98,32 +91,10 @@ function serializeStep(step: BuilderStep): string[] {
   pushField(lines, "showAutoAdvanceProgress", step.showAutoAdvanceProgress);
   pushField(lines, "mustClickTarget", step.mustClickTarget);
   pushField(lines, "mustEnterValue", step.mustEnterValue);
-
-  // Serialize step-level i18n
-  if (step.i18n && typeof step.i18n === "object") {
-    const entries = Object.entries(step.i18n).filter(
-      ([, v]) => v !== undefined && v !== null && String(v).trim() !== ""
-    );
-    if (entries.length > 0) {
-      lines.push("i18n:");
-      for (const [k, v] of entries) {
-        lines.push(`  ${k}: ${toYamlValue(v as string)}`);
-      }
-    }
-  }
-
-  // Serialize step-level theme
-  if (step.theme && typeof step.theme === "object") {
-    const entries = Object.entries(step.theme).filter(
-      ([, v]) => v !== undefined && v !== null && String(v).trim() !== ""
-    );
-    if (entries.length > 0) {
-      lines.push("theme:");
-      for (const [k, v] of entries) {
-        lines.push(`  ${k}: ${toYamlValue(v as string | number | boolean)}`);
-      }
-    }
-  }
+  pushObjectBlock(lines, "pills", step.pills);
+  pushObjectBlock(lines, "actions", step.actions);
+  pushObjectBlock(lines, "i18n", step.i18n);
+  pushObjectBlock(lines, "theme", step.theme);
 
   lines.push("```");
   return lines;

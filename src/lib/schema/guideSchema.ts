@@ -1,5 +1,59 @@
 import { z } from "zod";
-import { ADVANCE_MODES, HIGHLIGHT_ANIMATIONS, HIGHLIGHT_STYLES, STEP_KINDS, TOOLTIP_PLACEMENTS, TOOLTIP_TEMPLATES } from "../../types/builder";
+import {
+  ADVANCE_MODES,
+  HIGHLIGHT_ANIMATIONS,
+  HIGHLIGHT_STYLES,
+  PILL_TEXT_TRANSFORMS,
+  PRIMARY_ACTIONS,
+  STEP_KINDS,
+  TOOLTIP_PLACEMENTS,
+  TOOLTIP_TEMPLATES,
+} from "../../types/builder";
+
+const pillsSchema = z.object({
+  showStepProgress: z.boolean().optional(),
+  showKind: z.boolean().optional(),
+}).optional();
+
+const actionsSchema = z.object({
+  showClose: z.boolean().optional(),
+  showBack: z.boolean().optional(),
+  showNext: z.boolean().optional(),
+  showSkip: z.boolean().optional(),
+  primaryAction: z.enum(PRIMARY_ACTIONS).optional(),
+}).optional();
+
+const themeSchema = z.object({
+  tooltipTemplate: z.enum(TOOLTIP_TEMPLATES).optional(),
+  fontFamily: z.string().optional(),
+  tooltipBackgroundColor: z.string().optional(),
+  tooltipTextColor: z.string().optional(),
+  tooltipBorderColor: z.string().optional(),
+  tooltipBorderRadius: z.number().min(0).optional(),
+  tooltipShadow: z.string().optional(),
+  titleColor: z.string().optional(),
+  descriptionColor: z.string().optional(),
+  hintColor: z.string().optional(),
+  warningColor: z.string().optional(),
+  stepPillBackgroundColor: z.string().optional(),
+  stepPillTextColor: z.string().optional(),
+  kindPillBackgroundColor: z.string().optional(),
+  kindPillTextColor: z.string().optional(),
+  pillFontSize: z.number().min(0).optional(),
+  pillFontWeight: z.number().positive().optional(),
+  pillLetterSpacing: z.string().optional(),
+  pillTextTransform: z.enum(PILL_TEXT_TRANSFORMS).optional(),
+  primaryButtonBackgroundColor: z.string().optional(),
+  primaryButtonTextColor: z.string().optional(),
+  primaryButtonBorderColor: z.string().optional(),
+  primaryButtonHoverBackgroundColor: z.string().optional(),
+  primaryButtonHoverBorderColor: z.string().optional(),
+  ghostButtonBackgroundColor: z.string().optional(),
+  ghostButtonTextColor: z.string().optional(),
+  ghostButtonBorderColor: z.string().optional(),
+  timerTrackColor: z.string().optional(),
+  timerFillColor: z.string().optional(),
+}).partial().optional();
 
 const metaSchema = z.object({
   id: z.string().min(1),
@@ -16,7 +70,9 @@ const metaSchema = z.object({
   highlightAnimation: z.enum(HIGHLIGHT_ANIMATIONS).optional(),
   tooltipTemplate: z.enum(TOOLTIP_TEMPLATES).optional(),
   i18n: z.record(z.string(), z.string()).optional(),
-  theme: z.record(z.string(), z.unknown()).optional(),
+  pills: pillsSchema,
+  actions: actionsSchema,
+  theme: themeSchema,
 });
 
 const stepSchema = z.object({
@@ -41,7 +97,9 @@ const stepSchema = z.object({
   mustEnterValue: z.boolean().optional(),
   tooltipTemplate: z.enum(TOOLTIP_TEMPLATES).optional(),
   i18n: z.record(z.string(), z.string()).optional(),
-  theme: z.record(z.string(), z.unknown()).optional(),
+  pills: pillsSchema,
+  actions: actionsSchema,
+  theme: themeSchema,
 });
 
 export const builderGuideSchema = z.object({

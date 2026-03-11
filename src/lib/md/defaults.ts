@@ -16,6 +16,16 @@ export function createDefaultMeta(): BuilderMeta {
     tooltipWidth: 400,
     showHighlight: true,
     draggable: true,
+    pills: {
+      showStepProgress: true,
+      showKind: true,
+    },
+    actions: {
+      showClose: true,
+      showBack: true,
+      showNext: true,
+      showSkip: true,
+    },
   };
 }
 
@@ -33,6 +43,17 @@ export function createDefaultStep(seed = 1): BuilderStep {
     highlightAnimation: "none",
     draggable: true,
     showAutoAdvanceProgress: true,
+    pills: {
+      showStepProgress: true,
+      showKind: true,
+    },
+    actions: {
+      showClose: true,
+      showBack: true,
+      showNext: true,
+      showSkip: true,
+      primaryAction: "next",
+    },
   };
 }
 

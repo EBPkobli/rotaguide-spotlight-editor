@@ -22,6 +22,8 @@ function fromGuideDefinition(guide: GuideDefinition): BuilderGuide {
       highlightAnimation: guide.meta.highlightAnimation,
       tooltipTemplate: guide.meta.tooltipTemplate,
       i18n: guide.meta.i18n,
+      pills: guide.meta.pills,
+      actions: guide.meta.actions,
       theme: guide.meta.theme,
     },
     steps: guide.steps.map((step) => ({
@@ -46,6 +48,8 @@ function fromGuideDefinition(guide: GuideDefinition): BuilderGuide {
       mustEnterValue: step.mustEnterValue,
       tooltipTemplate: step.tooltipTemplate,
       i18n: step.i18n,
+      pills: step.pills,
+      actions: step.actions,
       theme: step.theme,
     })),
   };

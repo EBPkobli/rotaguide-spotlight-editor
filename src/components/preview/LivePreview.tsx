@@ -203,17 +203,39 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
   const activeTemplate =
     selectedStep?.tooltipTemplate || guide.meta.tooltipTemplate || "default";
   const tpl = TEMPLATE_DEFAULTS[activeTemplate] || TEMPLATE_DEFAULTS.default;
-  const theme = guide.meta.theme ?? {};
+  const theme = {
+    ...(guide.meta.theme ?? {}),
+    ...(selectedStep?.theme ?? {}),
+  };
+  const pills = {
+    ...(guide.meta.pills ?? {}),
+    ...(selectedStep?.pills ?? {}),
+  };
+  const actions = {
+    ...(guide.meta.actions ?? {}),
+    ...(selectedStep?.actions ?? {}),
+  };
+  const canSkip = selectedStep ? (selectedStep.skippable ?? selectedStep.allowSkip ?? true) : true;
+  const showStepPill = pills.showStepProgress !== false;
+  const showKindPill = pills.showKind !== false;
+  const showCloseButton = actions.showClose !== false;
+  const showBackButton = actions.showBack !== false;
+  const showSkipButton = canSkip && actions.showSkip !== false;
+  const showNextButton = actions.showNext !== false;
   const tt = {
     bg: (theme.tooltipBackgroundColor as string) || tpl.bg,
     border: (theme.tooltipBorderColor as string) || tpl.border,
     radius: (theme.tooltipBorderRadius as number) ?? tpl.radius,
     title: (theme.titleColor as string) || tpl.title,
     desc: (theme.descriptionColor as string) || tpl.desc,
-    pillStepBg: tpl.pillStepBg,
-    pillStepText: tpl.pillStepText,
-    pillKindBg: tpl.pillKindBg,
-    pillKindText: tpl.pillKindText,
+    pillStepBg: (theme.stepPillBackgroundColor as string) || tpl.pillStepBg,
+    pillStepText: (theme.stepPillTextColor as string) || tpl.pillStepText,
+    pillKindBg: (theme.kindPillBackgroundColor as string) || tpl.pillKindBg,
+    pillKindText: (theme.kindPillTextColor as string) || tpl.pillKindText,
+    pillFontSize: (theme.pillFontSize as number) ?? 11,
+    pillFontWeight: (theme.pillFontWeight as number) ?? 600,
+    pillLetterSpacing: (theme.pillLetterSpacing as string) || "0.02em",
+    pillTextTransform: (theme.pillTextTransform as string) || "none",
     ghostBg: (theme.ghostButtonBackgroundColor as string) || tpl.ghostBg,
     ghostText: (theme.ghostButtonTextColor as string) || tpl.ghostText,
     ghostBorder: (theme.ghostButtonBorderColor as string) || tpl.ghostBorder,
@@ -222,6 +244,39 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
     trackBg: (theme.timerTrackColor as string) || tpl.trackBg,
     fillBg: (theme.timerFillColor as string) || tpl.fillBg,
   };
+  const tooltipActions = [
+    showBackButton
+      ? {
+          key: "back",
+          label: guide.meta.i18n?.backButtonLabel || "Back",
+          primary: actions.primaryAction === "back",
+        }
+      : null,
+    showSkipButton
+      ? {
+          key: "skip",
+          label: guide.meta.i18n?.skipButtonLabel || "Skip",
+          primary: actions.primaryAction === "skip",
+        }
+      : null,
+    showNextButton
+      ? {
+          key: "next",
+          label:
+            stepIndex + 1 >= guide.steps.length
+              ? guide.meta.i18n?.finishButtonLabel || "Finish"
+              : guide.meta.i18n?.nextButtonLabel || "Next",
+          primary: (actions.primaryAction ?? "next") === "next",
+        }
+      : null,
+  ].filter(Boolean) as Array<{ key: string; label: string; primary: boolean }>;
+  const orderedTooltipActions =
+    tooltipActions.some((action) => action.primary)
+      ? [
+          ...tooltipActions.filter((action) => !action.primary),
+          ...tooltipActions.filter((action) => action.primary),
+        ]
+      : tooltipActions;
 
   return (
     <div className="flex flex-col flex-1 min-h-0 border-b border-[#3c3c3c]">
@@ -487,21 +542,63 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                       }}
                     />
 
-                    {/* Pills */}
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <span
-                        className="text-[8px] px-1.5 py-0.5 rounded-full font-bold"
-                        style={{ background: tt.pillStepBg, color: tt.pillStepText }}
-                      >
-                        {stepIndex + 1}/{guide.steps.length || 1}
-                      </span>
-                      <span
-                        className="text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase"
-                        style={{ background: tt.pillKindBg, color: tt.pillKindText }}
-                      >
-                        {kind}
-                      </span>
-                    </div>
+                    {/* Header controls */}
+                    {(showStepPill || showKindPill || showCloseButton) && (
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {showStepPill && (
+                            <span
+                              className="px-1.5 py-0.5 rounded-full"
+                              style={{
+                                background: tt.pillStepBg,
+                                color: tt.pillStepText,
+                                fontSize: `${tt.pillFontSize}px`,
+                                fontWeight: tt.pillFontWeight,
+                                letterSpacing: tt.pillLetterSpacing,
+                                textTransform: tt.pillTextTransform as
+                                  | "none"
+                                  | "uppercase"
+                                  | "lowercase"
+                                  | "capitalize",
+                              }}
+                            >
+                              {stepIndex + 1}/{guide.steps.length || 1}
+                            </span>
+                          )}
+                          {showKindPill && (
+                            <span
+                              className="px-1.5 py-0.5 rounded-full"
+                              style={{
+                                background: tt.pillKindBg,
+                                color: tt.pillKindText,
+                                fontSize: `${tt.pillFontSize}px`,
+                                fontWeight: tt.pillFontWeight,
+                                letterSpacing: tt.pillLetterSpacing,
+                                textTransform: tt.pillTextTransform as
+                                  | "none"
+                                  | "uppercase"
+                                  | "lowercase"
+                                  | "capitalize",
+                              }}
+                            >
+                              {kind}
+                            </span>
+                          )}
+                        </div>
+                        {showCloseButton && (
+                          <span
+                            className="inline-flex items-center justify-center size-5 rounded-full border text-[10px] font-bold"
+                            style={{
+                              borderColor: tt.ghostBorder,
+                              color: tt.ghostText,
+                              background: "transparent",
+                            }}
+                          >
+                            x
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Title */}
                     <h4
@@ -536,25 +633,28 @@ export function LivePreview({ guide, selectedStep, format, pickingTarget, onTarg
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex items-center justify-between">
-                      <button
-                        className="px-2.5 py-1 text-[9px] font-bold rounded-md border"
-                        style={{
-                          borderColor: tt.ghostBorder,
-                          color: tt.ghostText,
-                          background: tt.ghostBg,
-                        }}
-                      >
-                        {guide.meta.i18n?.backButtonLabel || "Back"}
-                      </button>
-                      <button
-                        className="px-2.5 py-1 text-[9px] font-bold rounded-md"
-                        style={{ background: tt.primaryBtnBg, color: tt.primaryBtnText }}
-                      >
-                        {stepIndex + 1 >= guide.steps.length
-                          ? guide.meta.i18n?.finishButtonLabel || "Finish"
-                          : guide.meta.i18n?.nextButtonLabel || "Next"}
-                      </button>
+                    <div className="flex items-center justify-end gap-2 flex-wrap">
+                      {orderedTooltipActions.map((action) => (
+                        <button
+                          key={action.key}
+                          className="px-2.5 py-1 text-[9px] font-bold rounded-md border"
+                          style={
+                            action.primary
+                              ? {
+                                  borderColor: tt.primaryBtnBg,
+                                  background: tt.primaryBtnBg,
+                                  color: tt.primaryBtnText,
+                                }
+                              : {
+                                  borderColor: tt.ghostBorder,
+                                  color: tt.ghostText,
+                                  background: tt.ghostBg,
+                                }
+                          }
+                        >
+                          {action.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
